@@ -1,0 +1,23 @@
+# build
+CGO_ENABLED=0 GOOS=linux go build -installsuffix cgo
+
+# start
+./pingpong
+
+# workload
+ab -k -c 30 -n 1000000 "http://localhost:8080/ping"
+
+# top
+top -p $(pgrep pingpong) 
+
+# docker image creation (via padman) and push
+podman image build -fContainerfile -tdocker.io/slytomcat/pingpong:latest
+podman tag docker.io/slytomcat/pingpong:latest docker.io/slytomcat/pingpong:1.0
+podman push docker.io/slytomcat/pingpong:1.0
+podman push docker.io/slytomcat/pingpong:latest
+
+# docker run
+docker run -p 8080:8080 --name pingpong -d slytomcat/pingpong
+
+# home stats
+# 3*ab by 1000 threads : up to 3008 goroutines, 520% cpu (+260% ab*3), 99225,8 req/sec (ab), 124345 max req/sec(app), 352,84Mb RAM Usage
