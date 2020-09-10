@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -13,10 +14,19 @@ var (
 	c, max uint64
 )
 
-func handle(resp http.ResponseWriter, req *http.Request) {
+func pong(resp http.ResponseWriter, req *http.Request) {
 	//r := req.Method + req.URL.Path
 	//log.Println(r)
-	resp.Write([]byte("Pong\n"))
+	resp.Write([]byte("pong\n"))
+	atomic.AddUint64(&c, 1)
+}
+
+func echo(resp http.ResponseWriter, req *http.Request) {
+	buf, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		resp.WriteHeader(http.StatusBadRequest)
+	}
+	resp.Write(buf)
 	atomic.AddUint64(&c, 1)
 }
 
@@ -26,7 +36,8 @@ func metrics(resp http.ResponseWriter, req *http.Request) {
 
 func main() {
 
-	http.HandleFunc("/ping", handle)
+	http.HandleFunc("/ping", pong)
+	http.HandleFunc("/echo", echo)
 	http.HandleFunc("/debug/pprof/metrics", metrics)
 	go func() {
 		for {
