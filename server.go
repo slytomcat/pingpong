@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"runtime"
 	"sync/atomic"
 	"time"
 )
@@ -49,6 +50,6 @@ func main() {
 		}
 	}()
 
-	log.Println("Ping/Pong server started at: 0.0.0.0:8080")
+	log.Printf("Ping/Pong server started at: 0.0.0.0:8080 on %d thread(s)\n", runtime.NumCPU())
 	log.Println(http.ListenAndServe("0.0.0.0:8080", nil))
 }
