@@ -52,7 +52,7 @@ jobs:
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
 
-          docker build . --file dockerfile --tag $IMAGE_ID:latest
+          docker build . --file Containerfile --tag $IMAGE_ID:latest
           
           # Push image to GitHub Packages.
           docker push --all-tags $IMAGE_ID
