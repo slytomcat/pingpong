@@ -8,7 +8,7 @@ For example you can test the network/server capabilities by ab (Apache HTTP serv
 
      ab -k -c 30 -n 100000 "http://<host:port>/ping"
 
-Docker image is available at: https://hub.docker.com/repository/docker/slytomcat/pingpong
+Docker image is available at: https://hub.docker.com/repository/docker/slytomcat/pingpong or in packages of this repo. 
 
 Docker container can be started by following command:
 
