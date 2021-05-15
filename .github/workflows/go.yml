@@ -1,0 +1,73 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
+    - name: Build
+      run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v ./...
+      
+    - name: Upload a Build Artifacts
+      uses: actions/upload-artifact@v2.2.2
+      with:
+        name: build_artifacts
+        path: pingpong
+      
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+
+    - name: Test
+      run: go test -v ./...
+      
+  push:
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    env: 
+      IMAGE_NAME: 'pingpong'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2.0.8
+        with:
+          name: build_artifacts
+
+      - name: Log into github registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      - name: Build and Push image for github
+        run: |
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          docker build . --file dockerfile --tag $IMAGE_ID:latest
+          
+          # Push image to GitHub Packages.
+          docker push --all-tags $IMAGE_ID
