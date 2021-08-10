@@ -50,6 +50,6 @@ func main() {
 		}
 	}()
 
-	log.Printf("Ping/Pong server started at: 0.0.0.0:8080 on %d thread(s)\n", runtime.NumCPU())
+	log.Printf("Ping/Pong server started at: 0.0.0.0:8080 on %d thread(s)\n", runtime.GOMAXPROCS(-1))
 	log.Println(http.ListenAndServe("0.0.0.0:8080", nil))
 }
